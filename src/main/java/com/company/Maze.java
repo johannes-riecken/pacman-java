@@ -3,12 +3,38 @@ package com.company;
 import org.jetbrains.annotations.Contract;
 
 import java.awt.*;
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.util.*;
 import java.util.List;
 import java.util.stream.Collectors;
+import javax.json.*;
+
+enum Target {
+    ArrayBuffer(34962),
+    ElementArrayBuffer(34963);
+    int value;
+
+    Target(int value) {
+        this.value = value;
+    }
+}
+
+enum Types {
+    Byte(5120),
+    UByte(5121),
+    Short(5122),
+    UShort(5123),
+    Int(5124),
+    UInt(5125),
+    Float(5126),
+    ;
+
+    Types(int value) {
+        this.value = value;
+    }
+
+    int value;
+}
 
 public class Maze {
     List<List<Point>> lines = new ArrayList<>();
@@ -79,7 +105,7 @@ public class Maze {
                         otherNeighbor = nCoords.size() > 0 ? nCoords.get(0) : null;
                         firstRun = false;
                     }
-                    lines.get(lines.size()-1).add(coord);
+                    lines.get(lines.size() - 1).add(coord);
                     visited.add(coord);
                     if (coord == otherNeighbor) {
                         polygons.add(lines.size() - 1);
@@ -151,8 +177,109 @@ public class Maze {
         return res.toString();
     }
 
-
-
+    String toJson() {
+        var buf = new MeshBuffer(List.of(
+                new UshortData((short) 0, (short) 1, (short) 2),
+                new FloatData(0.0f, 0.0f, 0.0f,
+                        1.0f, 0.0f, 0.0f,
+                        0.0f, 1.0f, 0.0f)));
+        /*
+                                .add(Json.createObjectBuilder()
+                                .add("buffer", 0)
+                                .add("byteOffset", 0) // TODO
+                                .add("byteLength", 6)
+                                .add("target", Target.ElementArrayBuffer.value)
+                        )
+                        .add(Json.createObjectBuilder()
+                                .add("buffer", 0)
+                                .add("byteOffset", 8) // TODO
+                                .add("byteLength", 36) // TODO
+                                .add("target", Target.ArrayBuffer.value)
+                        )
+         */
+        JsonObject model = Json.createObjectBuilder()
+                .add("scenes", Json.createArrayBuilder()
+                        .add(Json.createObjectBuilder()
+                                .add("nodes", Json.createArrayBuilder()
+                                        .add(0)
+                                )
+                        )
+                )
+                .add("nodes", Json.createArrayBuilder()
+                        .add(Json.createObjectBuilder()
+                                .add("mesh", 0)
+                        )
+                )
+                .add("meshes", Json.createArrayBuilder()
+                        .add(Json.createObjectBuilder()
+                                .add("primitives", Json.createArrayBuilder()
+                                        .add(Json.createObjectBuilder()
+                                                .add("attributes", Json.createObjectBuilder()
+                                                        .add("POSITION", 1)
+                                                )
+                                                .add("indices", 0)
+                                        )
+                                )
+                        )
+                )
+                .add("buffers", Json.createArrayBuilder()
+                        .add(Json.createObjectBuilder()
+                                .add("uri", buf.toString())
+                                .add("byteLength", buf.toBytes().length)
+                        )
+                )
+                .add("bufferViews", Json.createArrayBuilder()
+                        .add(Json.createObjectBuilder()
+                                .add("buffer", 0)
+                                .add("byteOffset", 0) // TODO
+                                .add("byteLength", 6)
+                                .add("target", Target.ElementArrayBuffer.value)
+                        )
+                        .add(Json.createObjectBuilder()
+                                .add("buffer", 0)
+                                .add("byteOffset", 8) // TODO
+                                .add("byteLength", 36) // TODO
+                                .add("target", Target.ArrayBuffer.value)
+                        )
+                )
+                .add("accessors", Json.createArrayBuilder()
+                        .add(Json.createObjectBuilder()
+                                .add("bufferView", 0)
+                                .add("byteOffset", 0)
+                                .add("componentType", Types.UShort.value)
+                                .add("count", 3)
+                                .add("type", "SCALAR")
+                                .add("max", Json.createArrayBuilder()
+                                        .add(2)
+                                )
+                                .add("min", Json.createArrayBuilder()
+                                        .add(0)
+                                )
+                        )
+                        .add(Json.createObjectBuilder()
+                                .add("bufferView", 1)
+                                .add("byteOffset", 0)
+                                .add("componentType", Types.Float.value)
+                                .add("count", 3)
+                                .add("type", "VEC3")
+                                .add("max", Json.createArrayBuilder()
+                                        .add(1)
+                                        .add(1)
+                                        .add(0)
+                                )
+                                .add("min", Json.createArrayBuilder()
+                                        .add(0)
+                                        .add(0)
+                                        .add(0)
+                                )
+                        )
+                )
+                .add("asset", Json.createObjectBuilder()
+                        .add("version", "2.0")
+                )
+                .build();
+        return model.toString();
+    }
 
 
     @Contract(pure = true)
@@ -173,7 +300,7 @@ public class Maze {
                 if (i % w == 0) {
                     m.add(new ArrayList<>());
                 }
-                m.get(m.size()-1).add(arr[i] == '1');
+                m.get(m.size() - 1).add(arr[i] == '1');
             }
 //            assert m.stream().flatMap(Collection::stream).map(x -> x ? '1' : '0').equals(Arrays.stream(arr));
 
@@ -182,6 +309,9 @@ public class Maze {
         var maze = new Maze(m);
         maze.findLineCoordLists();
         maze.compressLines();
-        System.out.println(maze.toSvg());
+        var res = maze.toJson();
+        try (var br = new BufferedWriter(new FileWriter("/tmp/got.gltf"))) {
+            br.write(res);
+        }
     }
 }
