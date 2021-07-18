@@ -9,33 +9,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 import javax.json.*;
 
-enum Target {
-    ArrayBuffer(34962),
-    ElementArrayBuffer(34963);
-    int value;
-
-    Target(int value) {
-        this.value = value;
-    }
-}
-
-enum Types {
-    Byte(5120),
-    UByte(5121),
-    Short(5122),
-    UShort(5123),
-    Int(5124),
-    UInt(5125),
-    Float(5126),
-    ;
-
-    Types(int value) {
-        this.value = value;
-    }
-
-    int value;
-}
-
 public class Maze {
     List<List<Point>> lines = new ArrayList<>();
     Set<Point> visited = new HashSet<>();
@@ -179,24 +152,45 @@ public class Maze {
 
     String toJson() {
         var buf = new MeshBuffer(List.of(
-                new UshortData((short) 0, (short) 1, (short) 2),
-                new FloatData(0.0f, 0.0f, 0.0f,
-                        1.0f, 0.0f, 0.0f,
-                        0.0f, 1.0f, 0.0f)));
-        /*
-                                .add(Json.createObjectBuilder()
-                                .add("buffer", 0)
-                                .add("byteOffset", 0) // TODO
-                                .add("byteLength", 6)
-                                .add("target", Target.ElementArrayBuffer.value)
-                        )
-                        .add(Json.createObjectBuilder()
-                                .add("buffer", 0)
-                                .add("byteOffset", 8) // TODO
-                                .add("byteLength", 36) // TODO
-                                .add("target", Target.ArrayBuffer.value)
-                        )
-         */
+                new UshortData(Target.ElementArrayBuffer, List.of((short) 0, (short) 1, (short) 2)),
+                new FloatVec3Data(Target.ArrayBuffer, List.of(new float[]{0.0f, 0.0f, 0.0f},
+                        new float[]{1.0f, 0.0f, 0.0f},
+                        new float[]{0.0f, 1.0f, 0.0f}))));
+        var bufferViewsBuilder = Json.createArrayBuilder();
+        int byteOffset = 0;
+        var realLengths = buf.toBytesHelper().stream().map(List::size).collect(Collectors.toList());
+        List<MeshData> objects = buf.objects();
+        for (int i = 0; i < objects.size(); i++) {
+            MeshData x = objects.get(i);
+            bufferViewsBuilder.add(Json.createObjectBuilder()
+                    .add("buffer", 0)
+                    .add("byteOffset", byteOffset)
+                    .add("byteLength", x.toBytes().length)
+                    .add("target", x.target().value)
+            );
+            byteOffset += realLengths.get(i);
+        }
+
+        var accessorsBuilder = Json.createArrayBuilder();
+        for (int i = 0; i < objects.size(); i++) {
+            var maxBuilder = Json.createArrayBuilder();
+            for (var x : objects.get(i).getMax()) {
+                maxBuilder.add(x);
+            }
+            var minBuilder = Json.createArrayBuilder();
+            for (var x : objects.get(i).getMin()) {
+                minBuilder.add(x);
+            }
+            accessorsBuilder.add(Json.createObjectBuilder()
+                    .add("bufferView", i)
+                    .add("byteOffset", 0)
+                    .add("componentType", objects.get(i).getComponentType())
+                    .add("count", objects.get(i).count())
+                    .add("type", objects.get(i).type())
+                    .add("max",  maxBuilder)
+                    .add("min", minBuilder)
+            );
+        }
         JsonObject model = Json.createObjectBuilder()
                 .add("scenes", Json.createArrayBuilder()
                         .add(Json.createObjectBuilder()
@@ -228,52 +222,8 @@ public class Maze {
                                 .add("byteLength", buf.toBytes().length)
                         )
                 )
-                .add("bufferViews", Json.createArrayBuilder()
-                        .add(Json.createObjectBuilder()
-                                .add("buffer", 0)
-                                .add("byteOffset", 0) // TODO
-                                .add("byteLength", 6)
-                                .add("target", Target.ElementArrayBuffer.value)
-                        )
-                        .add(Json.createObjectBuilder()
-                                .add("buffer", 0)
-                                .add("byteOffset", 8) // TODO
-                                .add("byteLength", 36) // TODO
-                                .add("target", Target.ArrayBuffer.value)
-                        )
-                )
-                .add("accessors", Json.createArrayBuilder()
-                        .add(Json.createObjectBuilder()
-                                .add("bufferView", 0)
-                                .add("byteOffset", 0)
-                                .add("componentType", Types.UShort.value)
-                                .add("count", 3)
-                                .add("type", "SCALAR")
-                                .add("max", Json.createArrayBuilder()
-                                        .add(2)
-                                )
-                                .add("min", Json.createArrayBuilder()
-                                        .add(0)
-                                )
-                        )
-                        .add(Json.createObjectBuilder()
-                                .add("bufferView", 1)
-                                .add("byteOffset", 0)
-                                .add("componentType", Types.Float.value)
-                                .add("count", 3)
-                                .add("type", "VEC3")
-                                .add("max", Json.createArrayBuilder()
-                                        .add(1)
-                                        .add(1)
-                                        .add(0)
-                                )
-                                .add("min", Json.createArrayBuilder()
-                                        .add(0)
-                                        .add(0)
-                                        .add(0)
-                                )
-                        )
-                )
+                .add("bufferViews", bufferViewsBuilder)
+                .add("accessors", accessorsBuilder)
                 .add("asset", Json.createObjectBuilder()
                         .add("version", "2.0")
                 )
