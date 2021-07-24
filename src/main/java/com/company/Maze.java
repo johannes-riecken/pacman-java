@@ -13,7 +13,19 @@ public class Maze {
     List<List<Point>> lines = new ArrayList<>();
     Set<Point> visited = new HashSet<>();
     Set<Integer> polygons = new HashSet<>();
+    List<List<Point3D>> triangleStrips = new ArrayList<>();
     List<List<Boolean>> m;
+    int wallHeight = 10;
+
+    List<List<Point3D>> getTriangleStrips() {
+        if (triangleStrips.size() > 0)
+            return triangleStrips;
+        return triangleStrips = lines.stream().map(line -> line.stream().<Point3D>mapMulti((e, consumer) -> {
+                    consumer.accept(new Point3D(e.y, 0, e.x));
+                    consumer.accept(new Point3D(e.y, wallHeight, e.x));
+                }
+        ).collect(Collectors.toList())).collect(Collectors.toList());
+    }
 
     public Maze(List<List<Boolean>> m) {
         this.m = m;
