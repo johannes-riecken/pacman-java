@@ -2,12 +2,14 @@ package com.company;
 
 import org.jetbrains.annotations.Contract;
 
+import javax.json.Json;
+import javax.json.JsonObject;
 import java.awt.*;
 import java.io.*;
-import java.util.*;
 import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
-import javax.json.*;
+import java.util.stream.IntStream;
 
 public class Maze {
     List<List<Point>> lines = new ArrayList<>();
@@ -164,10 +166,11 @@ public class Maze {
 
     String toJson() {
         var buf = new MeshBuffer(List.of(
-                new UshortData(Target.ElementArrayBuffer, List.of((short) 0, (short) 1, (short) 2)),
-                new FloatVec3Data(Target.ArrayBuffer, List.of(new float[]{0.0f, 0.0f, 0.0f},
-                        new float[]{1.0f, 0.0f, 0.0f},
-                        new float[]{0.0f, 1.0f, 0.0f}))));
+                new UshortData(Target.ElementArrayBuffer, IntStream.range(0, getTriangleStrips().stream().mapToInt(List::size).sum()).mapToObj(e -> (short) e).collect(Collectors.toList())),
+                new FloatVec3Data(Target.ArrayBuffer, getTriangleStrips().stream().flatMap(strip -> strip.stream().map(e -> new float[]{e.x(), e.y(), e.z()})).collect(Collectors.toList()))));
+        assert buf.objects().size() == 2;
+        assert buf.objects().get(0).count() > 0;
+        assert buf.objects().get(1).count() > 0;
         var bufferViewsBuilder = Json.createArrayBuilder();
         int byteOffset = 0;
         var realLengths = buf.toBytesHelper().stream().map(List::size).collect(Collectors.toList());
@@ -224,6 +227,7 @@ public class Maze {
                                                         .add("POSITION", 1)
                                                 )
                                                 .add("indices", 0)
+                                                .add("mode", Mode.TriangleStrip.value)
                                         )
                                 )
                         )

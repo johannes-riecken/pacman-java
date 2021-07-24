@@ -4,7 +4,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.List;
 
-public record UshortData(Target target, List<Short> data) implements MeshData<Short> {
+public record UshortData(Target target, List<Short> data) implements MeshData {
 
     public int getBYTES() {
         return Short.BYTES;

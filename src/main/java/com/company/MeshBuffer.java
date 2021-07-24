@@ -6,7 +6,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public record MeshBuffer(List<MeshData> objects) implements MeshData<Integer> {
+public record MeshBuffer(List<MeshData> objects) implements MeshData {
     @Override
     public String toString() {
         return "data:application/octet-stream;base64," + Base64.getEncoder().encodeToString(toBytes());

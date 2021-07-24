@@ -4,7 +4,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.List;
 
-public record FloatVec3Data(Target target, List<float[]> data) implements MeshData<float[]> {
+public record FloatVec3Data(Target target, List<float[]> data) implements MeshData {
 
     private static int nComponents = 3;
 
