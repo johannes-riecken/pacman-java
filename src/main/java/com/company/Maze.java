@@ -165,16 +165,19 @@ public class Maze {
     }
 
     String toJson() {
-        var buf = new MeshBuffer(List.of(
-                new UshortData(Target.ElementArrayBuffer, IntStream.range(0, getTriangleStrips().stream().mapToInt(List::size).sum()).mapToObj(e -> (short) e).collect(Collectors.toList())),
-                new FloatVec3Data(Target.ArrayBuffer, getTriangleStrips().stream().flatMap(strip -> strip.stream().map(e -> new float[]{e.x(), e.y(), e.z()})).collect(Collectors.toList()))));
-        assert buf.objects().size() == 2;
+        List<MeshData> objects = new ArrayList<>();
+        for (var i = 0; i < getTriangleStrips().size(); i++) {
+            objects.add(new UshortData(Target.ElementArrayBuffer, IntStream.range(0, getTriangleStrips().get(i).size()).mapToObj(e -> (short) e).collect(Collectors.toList())));
+            objects.add(new FloatVec3Data(Target.ArrayBuffer, getTriangleStrips().get(i).stream().map(e -> new float[]{e.x(), e.y(), e.z()}).collect(Collectors.toList())));
+        }
+        assert objects.size() == 2 * getTriangleStrips().size();
+        var buf = new MeshBuffer(objects);
+        assert buf.objects().size() % 2 == 0;
         assert buf.objects().get(0).count() > 0;
         assert buf.objects().get(1).count() > 0;
         var bufferViewsBuilder = Json.createArrayBuilder();
         int byteOffset = 0;
         var realLengths = buf.toBytesHelper().stream().map(List::size).collect(Collectors.toList());
-        List<MeshData> objects = buf.objects();
         for (int i = 0; i < objects.size(); i++) {
             MeshData x = objects.get(i);
             bufferViewsBuilder.add(Json.createObjectBuilder()
@@ -184,6 +187,18 @@ public class Maze {
                     .add("target", x.target().value)
             );
             byteOffset += realLengths.get(i);
+        }
+
+        var primitivesBuilder = Json.createArrayBuilder();
+        List<List<Point3D>> strips = getTriangleStrips();
+        for (int i = 0; i < strips.size(); i++) {
+            primitivesBuilder.add(Json.createObjectBuilder()
+                    .add("attributes", Json.createObjectBuilder()
+                            .add("POSITION", i * 2 + 1)
+                    )
+                    .add("indices", i * 2)
+                    .add("mode", Mode.TriangleStrip.value)
+            );
         }
 
         var accessorsBuilder = Json.createArrayBuilder();
@@ -221,15 +236,7 @@ public class Maze {
                 )
                 .add("meshes", Json.createArrayBuilder()
                         .add(Json.createObjectBuilder()
-                                .add("primitives", Json.createArrayBuilder()
-                                        .add(Json.createObjectBuilder()
-                                                .add("attributes", Json.createObjectBuilder()
-                                                        .add("POSITION", 1)
-                                                )
-                                                .add("indices", 0)
-                                                .add("mode", Mode.TriangleStrip.value)
-                                        )
-                                )
+                                .add("primitives", primitivesBuilder)
                         )
                 )
                 .add("buffers", Json.createArrayBuilder()
