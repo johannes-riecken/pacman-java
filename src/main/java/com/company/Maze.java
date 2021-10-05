@@ -1,7 +1,7 @@
 package com.company;
 
 import org.jetbrains.annotations.Contract;
-
+import com.code_intelligence.jazzer.api.FuzzedDataProvider;
 import javax.json.Json;
 import javax.json.JsonObject;
 import java.awt.*;
@@ -254,6 +254,19 @@ public class Maze {
         return model.toString();
     }
 
+    public static void fuzzerTestOneInput(FuzzedDataProvider data) {
+        var x = data.consumeInt();
+        var y = data.consumeInt();
+        var m = new ArrayList<List<Boolean>>();
+        for (var i = 0; i < x; i++) {
+            m.add(new ArrayList<>());
+            for (var j = 0; j < y; j++) {
+                m.get(m.size() - 1).add(data.consumeBoolean());
+            }
+        }
+        getStringFromMaze(m);
+    }
+
 
     @Contract(pure = true)
     public static void main(String[] args) throws IOException {
@@ -279,12 +292,16 @@ public class Maze {
 
 
         }
-        var maze = new Maze(m);
-        maze.findLineCoordLists();
-        maze.compressLines();
-        var res = maze.toJson();
+        String res = getStringFromMaze(m);
         try (var br = new BufferedWriter(new FileWriter("/tmp/got.gltf"))) {
             br.write(res);
         }
+    }
+
+    private static String getStringFromMaze(List<List<Boolean>> m) {
+        var maze = new Maze(m);
+        maze.findLineCoordLists();
+        maze.compressLines();
+        return maze.toJson();
     }
 }
