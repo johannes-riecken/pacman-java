@@ -14,6 +14,12 @@
     </properties>
 
     <dependencies>
+      <dependency>
+        <groupId>com.code-intelligence</groupId>
+        <artifactId>jazzer-api</artifactId>
+        <version>0.9.1</version>
+        <type>maven-plugin</type>
+      </dependency>
         <dependency>
             <groupId>javax.json</groupId>
             <artifactId>javax.json-api</artifactId>
