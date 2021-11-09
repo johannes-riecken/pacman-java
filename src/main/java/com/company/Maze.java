@@ -173,8 +173,8 @@ public class Maze {
         assert objects.size() == 2 * getTriangleStrips().size();
         var buf = new MeshBuffer(objects);
         assert buf.objects().size() % 2 == 0;
-        // assert buf.objects().get(0).count() > 0;
-        // assert buf.objects().get(1).count() > 0;
+        assert buf.objects().size() == 0 || buf.objects().get(0).count() > 0;
+        assert buf.objects().size() == 0 || buf.objects().get(1).count() > 0;
         var bufferViewsBuilder = Json.createArrayBuilder();
         int byteOffset = 0;
         var realLengths = buf.toBytesHelper().stream().map(List::size).collect(Collectors.toList());
@@ -298,7 +298,7 @@ public class Maze {
         }
     }
 
-    private static String getStringFromMaze(List<List<Boolean>> m) {
+    public static String getStringFromMaze(List<List<Boolean>> m) {
         var maze = new Maze(m);
         maze.findLineCoordLists();
         maze.compressLines();
