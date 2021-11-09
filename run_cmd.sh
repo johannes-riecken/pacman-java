@@ -1,0 +1,1 @@
+jazzer --cp=target/pacman-1.0-SNAPSHOT.jar:/root/.m2/repository/org/glassfish/javax.json/1.1.4/javax.json-1.1.4.jar:/root/.m2/repository/javax/json/javax.json-api/1.1.4/javax.json-api-1.1.4.jar --target_class=com.company.Maze
