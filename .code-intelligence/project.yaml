@@ -49,12 +49,10 @@ fuzz_tests:
 ## Address Sanitizer (and Undefined Behavior Sanitizer) is used.
 sanitizers:
   - address
-  - address
 
 ## The fuzzing engines to use for the fuzz tests. By default, only
 ## libfuzzer is used. Only valid for C/C++ targets.
 engines:
-  - libfuzzer
   - libfuzzer
 
 ## The run time after which the fuzz tests are cancelled and

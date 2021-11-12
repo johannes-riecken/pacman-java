@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 public class Maze {
     List<List<Point>> lines = new ArrayList<>();
@@ -22,10 +23,8 @@ public class Maze {
     List<List<Point3D>> getTriangleStrips() {
         if (triangleStrips.size() > 0)
             return triangleStrips;
-        return triangleStrips = lines.stream().map(line -> line.stream().<Point3D>mapMulti((e, consumer) -> {
-                    consumer.accept(new Point3D(e.y, 0, e.x));
-                    consumer.accept(new Point3D(e.y, wallHeight, e.x));
-                }
+        return triangleStrips = lines.stream().map(line -> line.stream().flatMap(e ->
+                    Stream.of(new Point3D(e.y, 0, e.x), new Point3D(e.y, wallHeight, e.x))
         ).collect(Collectors.toList())).collect(Collectors.toList());
     }
 
@@ -142,7 +141,7 @@ public class Maze {
         }
         assert chunks.size() <= coords.size();
         assert chunks.stream().mapToLong(Collection::size).sum() == coords.size();
-        return chunks.stream().flatMap(xs -> xs.size() == 1 ? xs.stream() : List.of(xs.get(0), xs.get(xs.size() - 1)).stream()).collect(Collectors.toList());
+        return chunks.stream().flatMap(xs -> xs.size() == 1 ? xs.stream() : Stream.of(xs.get(0), xs.get(xs.size() - 1))).collect(Collectors.toList());
     }
 
     String toSvg() {
