@@ -3,10 +3,18 @@ package com.company;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.List;
+import java.util.Objects;
 
-public record FloatVec3Data(Target target, List<float[]> data) implements MeshData {
+public final class FloatVec3Data implements MeshData {
 
     private static int nComponents = 3;
+    private final Target target;
+    private final List<float[]> data;
+
+    public FloatVec3Data(Target target, List<float[]> data) {
+        this.target = target;
+        this.data = data;
+    }
 
     public int getBYTES() {
         return Float.BYTES;
@@ -60,4 +68,34 @@ public record FloatVec3Data(Target target, List<float[]> data) implements MeshDa
         }
         return buf.array();
     }
+
+    public Target target() {
+        return target;
+    }
+
+    public List<float[]> data() {
+        return data;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) return true;
+        if (obj == null || obj.getClass() != this.getClass()) return false;
+        var that = (FloatVec3Data) obj;
+        return Objects.equals(this.target, that.target) &&
+                Objects.equals(this.data, that.data);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(target, data);
+    }
+
+    @Override
+    public String toString() {
+        return "FloatVec3Data[" +
+                "target=" + target + ", " +
+                "data=" + data + ']';
+    }
+
 }

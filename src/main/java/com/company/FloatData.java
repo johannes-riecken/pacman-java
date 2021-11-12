@@ -3,8 +3,16 @@ package com.company;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.List;
+import java.util.Objects;
 
-public record FloatData(Target target, List<Float> data) implements MeshData {
+public final class FloatData implements MeshData {
+    private final Target target;
+    private final List<Float> data;
+
+    public FloatData(Target target, List<Float> data) {
+        this.target = target;
+        this.data = data;
+    }
 
     public int getBYTES() {
         return Float.BYTES;
@@ -41,4 +49,34 @@ public record FloatData(Target target, List<Float> data) implements MeshData {
         }
         return buf.array();
     }
+
+    public Target target() {
+        return target;
+    }
+
+    public List<Float> data() {
+        return data;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) return true;
+        if (obj == null || obj.getClass() != this.getClass()) return false;
+        var that = (FloatData) obj;
+        return Objects.equals(this.target, that.target) &&
+                Objects.equals(this.data, that.data);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(target, data);
+    }
+
+    @Override
+    public String toString() {
+        return "FloatData[" +
+                "target=" + target + ", " +
+                "data=" + data + ']';
+    }
+
 }

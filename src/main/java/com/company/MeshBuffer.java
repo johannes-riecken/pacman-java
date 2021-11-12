@@ -1,12 +1,15 @@
 package com.company;
 
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
-public record MeshBuffer(List<MeshData> objects) implements MeshData {
+public final class MeshBuffer implements MeshData {
+    private final List<MeshData> objects;
+
+    public MeshBuffer(List<MeshData> objects) {
+        this.objects = objects;
+    }
+
     @Override
     public String toString() {
         return "data:application/octet-stream;base64," + Base64.getEncoder().encodeToString(toBytes());
@@ -72,4 +75,22 @@ public record MeshBuffer(List<MeshData> objects) implements MeshData {
     public float[] getMin() {
         return null;
     }
+
+    public List<MeshData> objects() {
+        return objects;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) return true;
+        if (obj == null || obj.getClass() != this.getClass()) return false;
+        var that = (MeshBuffer) obj;
+        return Objects.equals(this.objects, that.objects);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(objects);
+    }
+
 }

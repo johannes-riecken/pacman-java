@@ -1,4 +1,5 @@
-#!/bin/bash -eu
+#!/bin/bash
+set -eu
 # Step 1: Build the project
 
 # Build the project .jar as usual, e.g. using Maven.
@@ -9,7 +10,7 @@ mvn package
 CURRENT_VERSION=$(mvn org.apache.maven.plugins:maven-help-plugin:3.2.0:evaluate \
 -Dexpression=project.version -q -DforceStdout)
 # Copy the project .jar into $OUT under a fixed name.
-cp "target/pacman-$CURRENT_VERSION.jar" $OUT/pacman.jar
+cp "target/pacman-$CURRENT_VERSION-jar-with-dependencies.jar" $OUT/pacman.jar
 
 # Specify the projects .jar file(s), separated by spaces if there are multiple.
 PROJECT_JARS="pacman.jar"
@@ -23,10 +24,12 @@ BUILD_CLASSPATH=$(echo $PROJECT_JARS | xargs printf -- "$OUT/%s:"):$JAZZER_API_P
 # All .jar and .class files lie in the same directory as the fuzzer at runtime.
 RUNTIME_CLASSPATH=$(echo $PROJECT_JARS | xargs printf -- "\$this_dir/%s:"):\$this_dir
 
+echo $BUILD_CLASSPATH
+
 for fuzzer in $(find $SRC -name '*Fuzzer.java'); do
   fuzzer_basename=$(basename -s .java $fuzzer)
   javac -cp $BUILD_CLASSPATH $fuzzer
-  cp $SRC/$fuzzer_basename.class $OUT/
+  cp $SRC/pacman/src/$fuzzer_basename.class $OUT/
 
   # Create an execution wrapper that executes Jazzer with the correct arguments.
   echo "#!/bin/sh
