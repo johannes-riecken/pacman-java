@@ -1,5 +1,12 @@
 name: CIFuzz
-on: [pull_request]
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    # The branches below must be a subset of the branches above
+    branches: [ master ]
+  schedule:
+    - cron: '43 11 * * 2'
 jobs:
  Fuzzing:
    runs-on: ubuntu-latest
