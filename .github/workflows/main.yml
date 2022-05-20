@@ -15,7 +15,7 @@ jobs:
      fail-fast: false
      matrix:
        sanitizer:
-         coverage
+         - coverage
    steps:
    - name: Build Fuzzers $({{ matrix.sanitizer }})
      id: build
