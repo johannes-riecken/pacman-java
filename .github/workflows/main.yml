@@ -7,25 +7,33 @@ on:
     branches: [ master ]
   schedule:
     - cron: '43 11 * * 2'
+permissions: read-all
 jobs:
- Fuzzing:
+ BatchFuzzing:
    runs-on: ubuntu-latest
+   strategy:
+     fail-fast: false
+     matrix:
+       sanitizer:
+         coverage
    steps:
-   - name: Build Fuzzers
+   - name: Build Fuzzers $({{ matrix.sanitizer }})
      id: build
-     uses: google/oss-fuzz/infra/cifuzz/actions/build_fuzzers@master
+     uses: google/clusterfuzzlite/actions/build_fuzzers@v1
      with:
        oss-fuzz-project-name: 'example'
        language: jvm
-   - name: Run Fuzzers
-     uses: google/oss-fuzz/infra/cifuzz/actions/run_fuzzers@master
+       sanitizer: ${{ matrix.sanitizer }}
+   - name: Run Fuzzers (${{ matrix.sanitizer }})
+     id: run
+     uses: google/clusterfuzzlite/actions/run_fuzzers@v1
      with:
+       github-token: ${{ secrets.GITHUB_TOKEN }}
        oss-fuzz-project-name: 'example'
        language: jvm
-       fuzz-seconds: 600
-   - name: Upload Crash
-     uses: actions/upload-artifact@v1
-     if: failure() && steps.build.outcome == 'success'
-     with:
-       name: artifacts
-       path: ./out/artifacts
+       fuzz-seconds: 300
+       mode: coverage
+       sanitizer: ${{ matrix.sanitizer }}
+       storage-repo: https://${{ secrets.PERSONAL_ACCESS_TOKEN }}@github.com/johannes-riecken/pcre2_ast-storage.git
+       storage-repo-branch: main   # Optional. Defaults to "main"
+       storage-repo-branch-coverage: gh-pages  # Optional. Defaults to "gh-pages".
