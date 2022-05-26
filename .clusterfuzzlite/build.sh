@@ -1,8 +1,12 @@
 #!/bin/bash
 set -eu
 # Step 1: Build the project
-
+export JAVA_HOME=/usr/lib/jvm/jdk-18
+export PATH=$JAVA_HOME/bin:$PATH
+export JVM_LD_LIBRARY_PATH=$JAVA_HOME/lib/server
 # Build the project .jar as usual, e.g. using Maven.
+java -version
+javac -version
 mvn package
 # In this example, the project is built with Maven, which typically includes the
 # project version into the name of the packaged .jar file. The version can be
