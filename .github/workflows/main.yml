@@ -21,7 +21,6 @@ jobs:
      id: build
      uses: google/clusterfuzzlite/actions/build_fuzzers@v1
      with:
-       oss-fuzz-project-name: 'example'
        language: jvm
        sanitizer: ${{ matrix.sanitizer }}
    - name: Run Fuzzers (${{ matrix.sanitizer }})
@@ -29,11 +28,10 @@ jobs:
      uses: google/clusterfuzzlite/actions/run_fuzzers@v1
      with:
        github-token: ${{ secrets.GITHUB_TOKEN }}
-       oss-fuzz-project-name: 'example'
        language: jvm
        fuzz-seconds: 300
        mode: coverage
        sanitizer: ${{ matrix.sanitizer }}
-       storage-repo: https://${{ secrets.PERSONAL_ACCESS_TOKEN }}@github.com/johannes-riecken/pcre2_ast-storage.git
+       storage-repo: https://${{ secrets.PERSONAL_ACCESS_TOKEN }}@github.com/johannes-riecken/pacman-java-storage.git
        storage-repo-branch: main   # Optional. Defaults to "main"
        storage-repo-branch-coverage: gh-pages  # Optional. Defaults to "gh-pages".
