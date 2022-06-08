@@ -15,7 +15,7 @@ jobs:
      fail-fast: false
      matrix:
        sanitizer:
-         - coverage
+         - address
    steps:
    - name: Build Fuzzers $({{ matrix.sanitizer }})
      id: build
@@ -30,7 +30,7 @@ jobs:
        github-token: ${{ secrets.GITHUB_TOKEN }}
        language: jvm
        fuzz-seconds: 300
-       mode: coverage
+       mode: address
        sanitizer: ${{ matrix.sanitizer }}
        storage-repo: https://${{ secrets.PERSONAL_ACCESS_TOKEN }}@github.com/johannes-riecken/pacman-java-storage.git
        storage-repo-branch: main   # Optional. Defaults to "main"
