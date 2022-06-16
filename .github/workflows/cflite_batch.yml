@@ -1,9 +1,7 @@
 name: ClusterFuzzLite batch fuzzing
 on:
   push:
-    branches: ["java15"]
-  schedule:
-    - cron: '0 0/6 * * *'  # Every 6th hour. Change this to whatever is suitable.
+    branches: ["master"]
 permissions: read-all
 jobs:
   BatchFuzzing:
@@ -36,4 +34,3 @@ jobs:
         storage-repo: https://${{ secrets.PERSONAL_ACCESS_TOKEN }}@github.com/johannes-riecken/pacman-java-storage.git
         storage-repo-branch: main   # Optional. Defaults to "main"
         storage-repo-branch-coverage: gh-pages  # Optional. Defaults to "gh-pages".
-
