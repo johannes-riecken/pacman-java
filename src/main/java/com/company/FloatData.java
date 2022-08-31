@@ -14,14 +14,17 @@ public final class FloatData implements MeshData {
         this.data = data;
     }
 
+    @Override
     public int getBYTES() {
         return Float.BYTES;
     }
 
+    @Override
     public int getComponentType() {
         return ComponentType.Float.value;
     }
 
+    @Override
     public int count() {
         return data.size();
     }
@@ -41,6 +44,7 @@ public final class FloatData implements MeshData {
         return new float[]{data.stream().min(Float::compareTo).get()};
     }
 
+    @Override
     public byte[] toBytes() {
         var buf = ByteBuffer.allocate(Float.BYTES * data.size());
         buf.order(ByteOrder.LITTLE_ENDIAN);
@@ -50,6 +54,7 @@ public final class FloatData implements MeshData {
         return buf.array();
     }
 
+    @Override
     public Target target() {
         return target;
     }

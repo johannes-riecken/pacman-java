@@ -16,14 +16,17 @@ public final class FloatVec3Data implements MeshData {
         this.data = data;
     }
 
+    @Override
     public int getBYTES() {
         return Float.BYTES;
     }
 
+    @Override
     public int getComponentType() {
         return ComponentType.Float.value;
     }
 
+    @Override
     public float[] getMax() {
         float[] res = new float[3];
         res[0] = Float.NEGATIVE_INFINITY;
@@ -37,6 +40,7 @@ public final class FloatVec3Data implements MeshData {
         return res;
     }
 
+    @Override
     public float[] getMin() {
         float[] res = new float[3];
         res[0] = Float.POSITIVE_INFINITY;
@@ -50,6 +54,7 @@ public final class FloatVec3Data implements MeshData {
         return res;
     }
 
+    @Override
     public int count() {
         return data.size();
     }
@@ -59,6 +64,7 @@ public final class FloatVec3Data implements MeshData {
         return Type.Vec3.value;
     }
 
+    @Override
     public byte[] toBytes() {
         var buf = ByteBuffer.allocate(Float.BYTES * nComponents * data.size());
         buf.order(ByteOrder.LITTLE_ENDIAN);
@@ -69,6 +75,7 @@ public final class FloatVec3Data implements MeshData {
         return buf.array();
     }
 
+    @Override
     public Target target() {
         return target;
     }

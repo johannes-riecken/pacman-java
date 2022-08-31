@@ -14,30 +14,37 @@ public final class UshortData implements MeshData {
         this.data = data;
     }
 
+    @Override
     public int getBYTES() {
         return Short.BYTES;
     }
 
+    @Override
     public int getComponentType() {
         return ComponentType.UShort.value;
     }
 
+    @Override
     public int count() {
         return data.size();
     }
 
+    @Override
     public float[] getMax() {
         return new float[]{data.stream().max(Short::compareTo).get()};
     }
 
+    @Override
     public float[] getMin() {
         return new float[]{data.stream().min(Short::compareTo).get()};
     }
 
+    @Override
     public String type() {
         return Type.Scalar.value;
     }
 
+    @Override
     public byte[] toBytes() {
         var buf = ByteBuffer.allocate(Short.BYTES * data.size());
         buf.order(ByteOrder.LITTLE_ENDIAN);
@@ -47,6 +54,7 @@ public final class UshortData implements MeshData {
         return buf.array();
     }
 
+    @Override
     public Target target() {
         return target;
     }

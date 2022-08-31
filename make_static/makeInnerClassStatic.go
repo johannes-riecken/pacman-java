@@ -1,3 +1,4 @@
+// TODO: This requires more refactoring than just adding a static, because the methods are not static which is not allowed.
 package main
 
 import (
@@ -7,15 +8,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
-	"strings"
 )
-
-func main() {
-	err := mainAux()
-	if err != nil {
-		log.Fatal(err)
-	}
-}
 
 type region struct {
 	startLine   int
@@ -23,25 +16,32 @@ type region struct {
 	endColumn   int
 }
 
-func mainAux() error {
-	// missingOverridesJSON is generated from the output of the following commands:
+func main() {
+	err := mainAuxStaticClass()
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
+func mainAuxStaticClass() error {
+	// staticClassJSON is generated from the output of the following commands:
 	// codeql database create testdb --language java
 	// codeql database analyze testdb ~/.codeql/packages/codeql/java-queries/0.3.2/Advisory/Declarations/MissingOverrideAnnotation.ql --format=sarif-latest --output=missing_overrides.json
-	missingOverridesJSON, err := ioutil.ReadFile("missing_overrides.json")
+	staticClassJSON, err := ioutil.ReadFile("inner_class_static.json")
 	if err != nil {
 		return err
 	}
 
-	sarif, err := readSarif(missingOverridesJSON)
+	sarif, err := readSarif(staticClassJSON)
 	if err != nil {
 		return err
 	}
 	regions := getRegions(sarif)
 	// traverse regions backwards
 	for uri, fileRegions := range regions {
-		for i := range fileRegions {
+		for i := len(fileRegions) - 1; i >= 0; i-- {
 			r := fileRegions[i]
-			err := addOverrideAnnotation(uri, r)
+			err := makeInnerClassStatic(uri, r)
 			if err != nil {
 				return err
 			}
@@ -50,20 +50,11 @@ func mainAux() error {
 	return nil
 }
 
-// copy the file under fileName to a temporary file
-// open the temporary file for reading and a new file under uri for writing
-// loop over the file and write the lines to the new file
-// if the line matches the region's startLine, then first write "@Override\n"
-// then write the line
-func addOverrideAnnotation(fileName string, r region) error {
+func makeInnerClassStatic(fileName string, r region) error {
 	// copy the file under fileName to fileName.tmp
-	// if <fileName>.tmp already exists, don't rename
-	tmpFileName := fileName + ".tmp"
-	if _, err := os.Stat(tmpFileName); os.IsNotExist(err) {
-		err := os.Rename(fileName, fileName+".tmp")
-		if err != nil {
-			return err
-		}
+	err := os.Rename(fileName, fileName+".tmp")
+	if err != nil {
+		return err
 	}
 	// open the temporary file for reading and a new file under uri for writing
 	f, err := os.Open(fileName + ".tmp")
@@ -87,14 +78,9 @@ func addOverrideAnnotation(fileName string, r region) error {
 	for i := 0; scanner.Scan(); i++ {
 		lineText := scanner.Text()
 		if i == r.startLine-1 {
-			indentText := lineText[:len(lineText)-len(strings.TrimLeft(lineText, " "))]
-			s := indentText + "@Override\n"
-			// initialize indentText with the text of lineText's leading spaces
-
-			_, err := w.WriteString(s)
-			if err != nil {
-				return err
-			}
+			skip := "class "
+			j := r.startColumn - 1 - len(skip)
+			lineText = lineText[:j] + "static " + lineText[j:]
 		}
 		_, err := w.WriteString(lineText + "\n")
 		if err != nil {
