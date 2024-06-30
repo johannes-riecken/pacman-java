@@ -1,0 +1,11 @@
+[versions]
+com-code-intelligence-jazzer-api = "0.9.1"
+javax-json-javax-json-api = "1.1.4"
+org-glassfish-javax-json = "1.1.4"
+org-jetbrains-annotations = "24.1.0"
+
+[libraries]
+com-code-intelligence-jazzer-api = { module = "com.code-intelligence:jazzer-api", version.ref = "com-code-intelligence-jazzer-api" }
+javax-json-javax-json-api = { module = "javax.json:javax.json-api", version.ref = "javax-json-javax-json-api" }
+org-glassfish-javax-json = { module = "org.glassfish:javax.json", version.ref = "org-glassfish-javax-json" }
+org-jetbrains-annotations = { module = "org.jetbrains:annotations", version.ref = "org-jetbrains-annotations" }
